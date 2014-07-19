@@ -14,6 +14,8 @@ trait Graph<T> {
     /// Return the number of nodes in the graph
     fn num_nodes(&self) -> uint;
 
+    /// Do a breadth-first search of the graph, returning the resulting breadth-
+    /// first tree.
     fn bfs(&self) -> Digraph<NodeIndex> {
         let mut tree = Digraph::new();
 
@@ -22,11 +24,11 @@ trait Graph<T> {
         }
 
         let mut visited = HashSet::new();
-        let mut ondeck = RingBuf::new();
+        let mut discovered = RingBuf::new();
 
-        ondeck.push_back((0, None));
+        discovered.push_back((0, None));
         loop {
-            match ondeck.pop_front() {
+            match discovered.pop_front() {
                 None => break,
                 Some((ind, parent)) => {
                     tree.add_node(ind);
@@ -37,7 +39,7 @@ trait Graph<T> {
 
                     for i in self.adj(ind) {
                         if !visited.contains(i) {
-                            ondeck.push_back((*i, Some(ind)));
+                            discovered.push_back((*i, Some(ind)));
                         }
                     }
                 }
