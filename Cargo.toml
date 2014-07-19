@@ -1,0 +1,10 @@
+[package]
+
+name = "gymnosporangium"
+version = "0.0.1"
+authors = [ "Nick Hamann <nick@wabbo.org>" ]
+
+[[bin]]
+
+name = "gymnosporangium"
+path = "src/mod.rs"
