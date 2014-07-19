@@ -22,18 +22,19 @@ struct Graph<S> {
     num_nodes: uint,
 }
 
+#[deriving(Show)]
 struct Node<S> {
     data: S,
     index: NodeIndex,
 }
 
 impl<S> Graph<S> {
-    fn new() -> Graph<S> {
+    pub fn new() -> Graph<S> {
         Graph { nodes: vec!(), adj: vec!(), num_nodes: 0 }
     }
 
     /// Insert a new node, returning its index
-    fn add_node(&mut self, val: S) -> NodeIndex {
+    pub fn add_node(&mut self, val: S) -> NodeIndex {
         let ind = self.num_nodes;
         self.nodes.push(Node { data: val, index: ind });
         self.adj.push(HashSet::new());
@@ -41,7 +42,7 @@ impl<S> Graph<S> {
         ind
     }
 
-    fn add_edge(&mut self, i: NodeIndex, j: NodeIndex) -> Result<bool, GraphError> {
+    pub fn add_edge(&mut self, i: NodeIndex, j: NodeIndex) -> Result<bool, GraphError> {
         if i >= self.num_nodes {
             Err(GraphError::invalid_index(i))
         } else if j >= self.num_nodes {
@@ -57,7 +58,7 @@ impl<S> Graph<S> {
         }
     }
 
-    fn degree(&mut self, ind: NodeIndex) -> Result<uint, GraphError> {
+    pub fn degree(&mut self, ind: NodeIndex) -> Result<uint, GraphError> {
         if ind >= self.num_nodes {
             Err(GraphError::invalid_index(ind))
         } else {
@@ -65,7 +66,7 @@ impl<S> Graph<S> {
         }
     }
 
-    fn bfs(&self) -> Digraph<NodeIndex> {
+    pub fn bfs(&self) -> Digraph<NodeIndex> {
         let mut tree = Digraph::new();
 
         if self.num_nodes == 0 {
@@ -75,27 +76,30 @@ impl<S> Graph<S> {
         let mut visited = HashSet::new();
         let mut ondeck = RingBuf::new();
 
-        ondeck.push_back(0);
-        tree.add_node(0);
+        ondeck.push_back((0, None));
+        loop {
+            match ondeck.pop_front() {
+                None => break,
+                Some((ind, parent)) => {
+                    tree.add_node(ind);
+                    if parent.is_some() {
+                        tree.add_edge(parent.unwrap(), ind);
+                    }
+                    visited.insert(ind);
 
-        let mut parent = 0; 
-        let mut next = ondeck.pop_front();
-        while !next.is_none() {
-            for i in self.adj[next.unwrap()].iter() {
-                if !visited.contains(i) {
-                    tree.add_node(*i);
-                    tree.add_edge(parent, *i);
-                    visited.insert(*i);
+                    for i in self.adj[ind].iter() {
+                        if !visited.contains(i) {
+                            ondeck.push_back((*i, Some(ind)));
+                        }
+                    }
                 }
             }
-            parent = next.unwrap();
-            next = ondeck.pop_front();
         }
-
         return tree;
     }
 }
 
+#[deriving(Show)]
 struct Digraph<S> {
     nodes: Vec<Node<S>>,
     in_adj: Vec<HashSet<NodeIndex>>,
@@ -104,12 +108,12 @@ struct Digraph<S> {
 }
 
 impl<S> Digraph<S> {
-    fn new() -> Digraph<S> {
+    pub fn new() -> Digraph<S> {
         Digraph { nodes: vec!(), in_adj: vec!(), out_adj: vec!(), num_nodes: 0 }
     }
 
     /// Insert a new node, returning its index
-    fn add_node(&mut self, val: S) -> NodeIndex {
+    pub fn add_node(&mut self, val: S) -> NodeIndex {
         let ind = self.num_nodes;
         self.nodes.push(Node { data: val, index: ind });
         self.in_adj.push(HashSet::new());
@@ -118,7 +122,7 @@ impl<S> Digraph<S> {
         ind
     }
 
-    fn add_edge(&mut self, i: NodeIndex, j: NodeIndex) -> Result<bool, GraphError> {
+    pub fn add_edge(&mut self, i: NodeIndex, j: NodeIndex) -> Result<bool, GraphError> {
         if i >= self.num_nodes {
             Err(GraphError::invalid_index(i))
         } else if j >= self.num_nodes {
@@ -134,7 +138,7 @@ impl<S> Digraph<S> {
         }
     }
 
-    fn out_degree(&mut self, ind: NodeIndex) -> Result<uint, GraphError> {
+    pub fn out_degree(&mut self, ind: NodeIndex) -> Result<uint, GraphError> {
         if ind >= self.num_nodes {
             Err(GraphError::invalid_index(ind))
         } else {
@@ -142,7 +146,7 @@ impl<S> Digraph<S> {
         }
     }
 
-    fn in_degree(&mut self, ind: NodeIndex) -> Result<uint, GraphError> {
+    pub fn in_degree(&mut self, ind: NodeIndex) -> Result<uint, GraphError> {
         if ind >= self.num_nodes {
             Err(GraphError::invalid_index(ind))
         } else {
@@ -150,7 +154,7 @@ impl<S> Digraph<S> {
         }
     }
 
-    fn bfs(&self) -> Digraph<NodeIndex> {
+    pub fn bfs(&self) -> Digraph<NodeIndex> {
         let mut tree = Digraph::new();
 
         if self.num_nodes == 0 {
@@ -160,23 +164,25 @@ impl<S> Digraph<S> {
         let mut visited = HashSet::new();
         let mut ondeck = RingBuf::new();
 
-        ondeck.push_back(0);
-        tree.add_node(0);
+        ondeck.push_back((0, None));
+        loop {
+            match ondeck.pop_front() {
+                None => break,
+                Some((ind, parent)) => {
+                    tree.add_node(ind);
+                    if parent.is_some() {
+                        tree.add_edge(parent.unwrap(), ind);
+                    }
+                    visited.insert(ind);
 
-        let mut parent = 0; 
-        let mut next = ondeck.pop_front();
-        while !next.is_none() {
-            for i in self.out_adj[next.unwrap()].iter() {
-                if !visited.contains(i) {
-                    tree.add_node(*i);
-                    tree.add_edge(parent, *i);
-                    visited.insert(*i);
+                    for i in self.out_adj[ind].iter() {
+                        if !visited.contains(i) {
+                            ondeck.push_back((*i, Some(ind)));
+                        }
+                    }
                 }
             }
-            parent = next.unwrap();
-            next = ondeck.pop_front();
         }
-
         return tree;
     }
 }
