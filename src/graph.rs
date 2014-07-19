@@ -1,6 +1,4 @@
-use std::collections::HashSet;
-
-use super::Tree;
+use std::collections::{HashSet, RingBuf, Deque};
 
 struct GraphError {
     error_type: GraphErrorType,
@@ -30,10 +28,17 @@ struct Node<S> {
 }
 
 impl<S> Graph<S> {
-    fn add_node(&mut self, val: S) {
-        self.nodes.push(Node { data: val, index: self.num_nodes });
+    fn new() -> Graph<S> {
+        Graph { nodes: vec!(), adj: vec!(), num_nodes: 0 }
+    }
+
+    /// Insert a new node, returning its index
+    fn add_node(&mut self, val: S) -> NodeIndex {
+        let ind = self.num_nodes;
+        self.nodes.push(Node { data: val, index: ind });
         self.adj.push(HashSet::new());
         self.num_nodes += 1;
+        ind
     }
 
     fn add_edge(&mut self, i: NodeIndex, j: NodeIndex) -> Result<bool, GraphError> {
@@ -59,6 +64,36 @@ impl<S> Graph<S> {
             Ok(self.adj[ind].len())
         }
     }
+
+    fn bfs(&self) -> Digraph<NodeIndex> {
+        let mut tree = Digraph::new();
+
+        if self.num_nodes == 0 {
+            return tree;
+        }
+
+        let mut visited = HashSet::new();
+        let mut ondeck = RingBuf::new();
+
+        ondeck.push_back(0);
+        tree.add_node(0);
+
+        let mut parent = 0; 
+        let mut next = ondeck.pop_front();
+        while !next.is_none() {
+            for i in self.adj[next.unwrap()].iter() {
+                if !visited.contains(i) {
+                    tree.add_node(*i);
+                    tree.add_edge(parent, *i);
+                    visited.insert(*i);
+                }
+            }
+            parent = next.unwrap();
+            next = ondeck.pop_front();
+        }
+
+        return tree;
+    }
 }
 
 struct Digraph<S> {
@@ -69,11 +104,18 @@ struct Digraph<S> {
 }
 
 impl<S> Digraph<S> {
-    fn add_node(&mut self, val: S) {
-        self.nodes.push(Node { data: val, index: self.num_nodes });
+    fn new() -> Digraph<S> {
+        Digraph { nodes: vec!(), in_adj: vec!(), out_adj: vec!(), num_nodes: 0 }
+    }
+
+    /// Insert a new node, returning its index
+    fn add_node(&mut self, val: S) -> NodeIndex {
+        let ind = self.num_nodes;
+        self.nodes.push(Node { data: val, index: ind });
         self.in_adj.push(HashSet::new());
         self.out_adj.push(HashSet::new());
         self.num_nodes += 1;
+        ind
     }
 
     fn add_edge(&mut self, i: NodeIndex, j: NodeIndex) -> Result<bool, GraphError> {
@@ -106,5 +148,35 @@ impl<S> Digraph<S> {
         } else {
             Ok(self.in_adj[ind].len())
         }
+    }
+
+    fn bfs(&self) -> Digraph<NodeIndex> {
+        let mut tree = Digraph::new();
+
+        if self.num_nodes == 0 {
+            return tree;
+        }
+
+        let mut visited = HashSet::new();
+        let mut ondeck = RingBuf::new();
+
+        ondeck.push_back(0);
+        tree.add_node(0);
+
+        let mut parent = 0; 
+        let mut next = ondeck.pop_front();
+        while !next.is_none() {
+            for i in self.out_adj[next.unwrap()].iter() {
+                if !visited.contains(i) {
+                    tree.add_node(*i);
+                    tree.add_edge(parent, *i);
+                    visited.insert(*i);
+                }
+            }
+            parent = next.unwrap();
+            next = ondeck.pop_front();
+        }
+
+        return tree;
     }
 }
