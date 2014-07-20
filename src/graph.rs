@@ -68,7 +68,8 @@ enum GraphErrorType {
     InvalidNodeIndex(NodeIndex),
 }
 
-type NodeIndex = uint;
+pub type NodeIndex = uint;
+type NodeIndexSet = HashSet<NodeIndex>;
 
 #[deriving(Show, Clone)]
 struct Node<T> {
@@ -80,7 +81,7 @@ struct Node<T> {
 #[deriving(Show)]
 pub struct UnGraph<T> {
     nodes: Vec<Node<T>>,
-    adj: Vec<HashSet<NodeIndex>>,
+    adj: Vec<NodeIndexSet>,
     num_nodes: uint,
 }
 
@@ -88,8 +89,8 @@ pub struct UnGraph<T> {
 #[deriving(Show)]
 pub struct Digraph<T> {
     nodes: Vec<Node<T>>,
-    in_adj: Vec<HashSet<NodeIndex>>,
-    out_adj: Vec<HashSet<NodeIndex>>,
+    in_adj: Vec<NodeIndexSet>,
+    out_adj: Vec<NodeIndexSet>,
     num_nodes: uint,
 }
 
@@ -108,7 +109,7 @@ impl<T> UnGraph<T> {
 }
 impl<T: Clone> UnGraph<T> {
     /// Returns a new graph induced by a set of node indices
-    pub fn induced_subgraph(&self, nodes: &HashSet<NodeIndex>) -> UnGraph<T> {
+    pub fn induced_subgraph(&self, nodes: &NodeIndexSet) -> UnGraph<T> {
         let mut new = UnGraph::new();
         let mut ind_map = HashMap::new();
 
@@ -190,7 +191,7 @@ impl<T> Digraph<T> {
 
 impl<T: Clone> Digraph<T> {
     /// Returns a new graph induced by a set of node indices
-    pub fn induced_subgraph(&self, nodes: &HashSet<NodeIndex>) -> Digraph<T> {
+    pub fn induced_subgraph(&self, nodes: &NodeIndexSet) -> Digraph<T> {
         let mut new = Digraph::new();
         let mut ind_map = HashMap::new();
 
@@ -270,7 +271,7 @@ impl Iterator<NodeIndex> for NodeIndices {
 }
 
 impl NodeIndices {
-    fn from_set(set: &HashSet<NodeIndex>) -> NodeIndices {
+    fn from_set(set: &NodeIndexSet) -> NodeIndices {
         let mut vec = vec!();
         for &i in set.iter() {
             vec.push(i);
