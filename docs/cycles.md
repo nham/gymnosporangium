@@ -48,3 +48,12 @@ For any acyclic unigraph $G$, if $i$ is a node with no out-neighbors and $H$ is 
 Any acyclic unigraph can be reduced to an empty unigraph by removing leaf nodes.
 
 *Proof:* The last two propositions say that 1) every acyclic graph has a leaf node and 2) removing a leaf node from an acyclic graph results in another acyclic graph.
+
+
+# Subgraphs
+A graph $G = (V, E)$ is the **subgraph** of a graph $H = (W, F)$ iff $V \subseteq W$ and $E \subseteq F$. If $E$ consists of every edge in $F$ between nodes in $V$, then $G$ is said to be an **induced subgraph** or to be the subgraph **induced by $V$**.
+
+# Connected component
+An induced subgraph $H$ of $G$ is a **connected component** of $G$ iff there is a path starting at any node and ending at any other node in $H$.
+
+Note: everyone else seems to call this a "strongly connected component", but that's a bad name because it makes you think there's some other notion of connectedness in use. "Strongly connected component" is actually how you generalize "connected component" to digraphs, as far as I understand. It's the only notion of connectedness you generally want. Hence I call it simply "connected component" here.
