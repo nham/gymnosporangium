@@ -1,8 +1,8 @@
-use std::collections::{HashSet, HashMap, RingBuf, Deque};
-use std::collections::hashmap::SetItems;
+use {HashSet};
+use std::collections::{HashMap, RingBuf, Deque};
 
 // call this Unigraph instead?
-trait Graph<T> {
+pub trait Graph<T> {
     /// Insert a new node, returning its index
     fn add_node(&mut self, val: T) -> NodeIndex;
 
@@ -11,58 +11,12 @@ trait Graph<T> {
     fn add_edge(&mut self, i: NodeIndex, j: NodeIndex) -> GraphResult<bool>;
 
     /// Return an iterator over the out-neighbors for a given node
-    fn adj<'a>(&'a self, i: NodeIndex) -> NodeIndices<'a>;
+    fn adj(&self, i: NodeIndex) -> NodeIndices;
 
     /// Return the number of nodes in the graph
     fn num_nodes(&self) -> uint;
 
-    /// Do a breadth-first search of the graph, returning the resulting breadth-
-    /// first forest.
-    fn bfs(&self, start: NodeIndex) -> Digraph<NodeIndex> {
-        let mut tree = Digraph::new();
-
-        if self.num_nodes() == 0 {
-            return tree;
-        }
-
-        let mut unvisited = HashSet::new();
-        let mut visited = HashSet::new();
-        let mut discovered = RingBuf::new();
-
-        for &i in self.nodes.iter() {
-            unvisited.insert(i);
-        }
-
-        discovered.push_back((start, None));
-        loop {
-            match discovered.pop_front() {
-                None => {
-                    if unvisited.len() == 0 {
-                        break;
-                    } else {
-                        let another = unvisited.iter().next().unwrap();
-                        discovered.push_back((another, None));
-                        continue;
-                    }
-                },
-                Some((ind, parent)) => {
-                    tree.add_node(ind);
-                    if parent.is_some() {
-                        tree.add_edge(parent.unwrap(), ind);
-                    }
-                    visited.insert(ind);
-                    unvisited.remove(ind);
-
-                    for i in self.adj(ind) {
-                        if !visited.contains(i) {
-                            discovered.push_back((*i, Some(ind)));
-                        }
-                    }
-                }
-            }
-        }
-        return tree;
-    }
+    fn node_indices(&self) -> NodeIndices;
 
     fn dfs(&self) -> Digraph<NodeIndex> {
         let mut tree = Digraph::new();
@@ -124,7 +78,7 @@ struct Node<T> {
 
 /// Undirected graph. Allows loops.
 #[deriving(Show)]
-struct UnGraph<T> {
+pub struct UnGraph<T> {
     nodes: Vec<Node<T>>,
     adj: Vec<HashSet<NodeIndex>>,
     num_nodes: uint,
@@ -132,7 +86,7 @@ struct UnGraph<T> {
 
 /// Directed graph. Allows loops.
 #[deriving(Show)]
-struct Digraph<T> {
+pub struct Digraph<T> {
     nodes: Vec<Node<T>>,
     in_adj: Vec<HashSet<NodeIndex>>,
     out_adj: Vec<HashSet<NodeIndex>>,
@@ -199,12 +153,16 @@ impl<T> Graph<T> for UnGraph<T> {
         }
     }
 
-    fn adj<'a>(&'a self, i: NodeIndex) -> NodeIndices<'a> {
+    fn adj(&self, i: NodeIndex) -> NodeIndices {
         NodeIndices::from_set(&self.adj[i])
     }
 
     fn num_nodes(&self) -> uint {
         self.num_nodes
+    }
+
+    fn node_indices(&self) -> NodeIndices {
+        NodeIndices::from_node_vec(&self.nodes)
     }
 }
 
@@ -282,27 +240,50 @@ impl<T> Graph<T> for Digraph<T> {
         }
     }
 
-    fn adj<'a>(&'a self, i: NodeIndex) -> NodeIndices<'a> {
+    fn adj(&self, i: NodeIndex) -> NodeIndices {
         NodeIndices::from_set(&self.out_adj[i])
     }
 
     fn num_nodes(&self) -> uint {
         self.num_nodes
     }
-}
 
-struct NodeIndices<'a> {
-    indices: SetItems<'a, NodeIndex>,
-}
-
-impl<'a> Iterator<&'a NodeIndex> for NodeIndices<'a> {
-    fn next(&mut self) -> Option<&'a NodeIndex> {
-        self.indices.next()
+    fn node_indices(&self) -> NodeIndices {
+        NodeIndices::from_node_vec(&self.nodes)
     }
 }
 
-impl<'a> NodeIndices<'a> {
-    fn from_set(set: &'a HashSet<NodeIndex>) -> NodeIndices<'a> {
-        NodeIndices { indices: set.iter() }
+struct NodeIndices {
+    indices: Vec<NodeIndex>,
+    curr: uint,
+}
+
+impl Iterator<NodeIndex> for NodeIndices {
+    fn next(&mut self) -> Option<NodeIndex> {
+        if self.curr < self.indices.len() {
+            self.curr += 1;
+            Some(self.indices[self.curr - 1])
+        } else {
+            None
+        }
+    }
+}
+
+impl NodeIndices {
+    fn from_set(set: &HashSet<NodeIndex>) -> NodeIndices {
+        let mut vec = vec!();
+        for &i in set.iter() {
+            vec.push(i);
+        }
+        NodeIndices { indices: vec, curr: 0 }
+    }
+
+    fn from_node_vec<T>(vec: &Vec<Node<T>>) -> NodeIndices {
+        let mut new = vec!();
+        for n in vec.iter() {
+            new.push(n.index);
+        }
+
+        NodeIndices { indices: new, curr: 0 }
     }
 }
