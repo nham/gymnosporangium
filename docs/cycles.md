@@ -24,14 +24,27 @@ A **walk** in a unigraph is a finite sequence of nodes $(x_1, \ldots, x_n)$ such
 
 A **sub-walk** of a walk $w$ is just a walk $x$ that is a sub-sequence of $w$.
 
-A **cycle** is a walk of at least length 2 that starts and ends at the same node.
+A **cycle** is a walk with at least length 3 distinct nodes that starts and ends at the same node.
 
 Consider the collection $W$ of all walks for a graph $G$. $G$ is said to be **cyclic** if $W$ contains at least one cycle, and **acyclic** otherwise.
 
 It is easy to prove if $w$ is a walk for a unigraph $G$, then any sub-walk is also a walk for $G$.
+
+A node with no out-neighbors will be called a **leaf node**.
 
 
 ## Proposition
 For any unigraph $G$, if every node in $G$ has an out-neighbor, then $G$ is cyclic.
 
 *Proof:* Since *every* node has an out-neighbor, we can construct walks of arbitrary length (for any walk, just append to it one of the out-neighbors of the last node). So there exists a walk whose length is greater than the number of nodes in the $G$. By the pigeonhole principle, one of the nodes must exist at two distinct steps in the walk, so we take the sub-walk starting and ending at those distinct steps to obtain a cycle.
+
+
+## Proposition
+For any acyclic unigraph $G$, if $i$ is a node with no out-neighbors and $H$ is the unigraph formed by removing $i$, then $H$ is also acyclic.
+
+*Proof:* If $H$ were not acyclic then there would be a walk $w$ of $H$ that is a cycle. $w$ must also be a walk of $G$, so $w$ is a cycle of $G$.
+
+### Corollary
+Any acyclic unigraph can be reduced to an empty unigraph by removing leaf nodes.
+
+*Proof:* The last two propositions say that 1) every acyclic graph has a leaf node and 2) removing a leaf node from an acyclic graph results in another acyclic graph.
