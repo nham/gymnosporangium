@@ -1,11 +1,13 @@
 use {HashSet};
 use std::collections::{HashMap, RingBuf, Deque};
-use graph::{Graph, NodeIndex, Digraph};
+
+use graph::{Graph, NodeIndex};
+use tree::Tree;
 
 /// Do a breadth-first search of the graph, returning the resulting breadth-
 /// first tree (a tree on the connected component containing the stard node)
-fn bfs_tree<T, G: Graph<T>>(g: &G, start: NodeIndex) -> Digraph<NodeIndex> {
-    let mut tree = Digraph::new();
+fn bfs_tree<T, G: Graph<T>>(g: &G, start: NodeIndex) -> Tree<NodeIndex> {
+    let mut tree = Tree::new();
 
     if g.num_nodes() == 0 {
         return tree;
@@ -19,9 +21,9 @@ fn bfs_tree<T, G: Graph<T>>(g: &G, start: NodeIndex) -> Digraph<NodeIndex> {
         match discovered.pop_front() {
             None => break,
             Some((ind, parent)) => {
-                tree.add_node(ind);
-                if parent.is_some() {
-                    tree.add_edge(parent.unwrap(), ind);
+                match parent {
+                    None => tree.add_root(ind),
+                    Some(p_ind) => tree.add_child(p_ind, ind),
                 }
                 visited.insert(ind);
 

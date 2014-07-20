@@ -27,12 +27,25 @@ impl<T> Tree<T> {
         Tree { root: Some(0), nodes: vec!(root), children: vec!(), num_nodes: 1 }
     }
 
+    /// Add a root to any empty tree
+    pub fn add_root(&mut self, val: T) {
+        self.add_node(None, val);
+    }
+
     pub fn add_child(&mut self, parent: NodeIndex, val: T) {
+        self.add_node(Some(parent), val);
+    }
+
+    fn add_node(&mut self, parent: Option<NodeIndex>, val: T) {
         // TODO: check whether NodeIndex is valid?
-        let node = Node { data: val, index: self.num_nodes, parent: Some(parent) };
+        let node = Node { data: val, index: self.num_nodes, parent: parent };
         self.nodes.push(node);
         self.children.push(HashSet::new());
-        self.children.get_mut(parent).insert(self.num_nodes);
+
+        if parent.is_some() {
+            self.children.get_mut(parent.unwrap()).insert(self.num_nodes);
+        }
+
         self.num_nodes += 1;
     }
 }
