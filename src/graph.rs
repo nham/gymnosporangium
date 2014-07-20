@@ -17,21 +17,35 @@ trait Graph<T> {
     fn num_nodes(&self) -> uint;
 
     /// Do a breadth-first search of the graph, returning the resulting breadth-
-    /// first tree.
-    fn bfs(&self) -> Digraph<NodeIndex> {
+    /// first forest.
+    fn bfs(&self, start: NodeIndex) -> Digraph<NodeIndex> {
         let mut tree = Digraph::new();
 
         if self.num_nodes() == 0 {
             return tree;
         }
 
+        let mut unvisited = HashSet::new();
         let mut visited = HashSet::new();
         let mut discovered = RingBuf::new();
 
-        discovered.push_back((0, None));
+        for &i in self.nodes.iter() {
+            unvisited.insert(i);
+        }
+
+        discovered.push_back((start, None));
         loop {
             match discovered.pop_front() {
-                None => break,
+                None => {
+                    if unvisited.len() == 0 {
+                        break;
+                    } else {
+                        let another = unvisited.iter().next().unwrap();
+                        unvisited.remove(&another);
+                        discovered.push_back((another, None));
+                        continue;
+                    }
+                },
                 Some((ind, parent)) => {
                     tree.add_node(ind);
                     if parent.is_some() {
