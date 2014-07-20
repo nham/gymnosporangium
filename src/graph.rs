@@ -1,6 +1,7 @@
-use std::collections::{HashSet, RingBuf, Deque};
+use std::collections::{HashSet, HashMap, RingBuf, Deque};
 use std::collections::hashmap::SetItems;
 
+// call this Unigraph instead?
 trait Graph<T> {
     /// Insert a new node, returning its index
     fn add_node(&mut self, val: T) -> NodeIndex;
@@ -9,6 +10,7 @@ trait Graph<T> {
     /// and a result otherwise
     fn add_edge(&mut self, i: NodeIndex, j: NodeIndex) -> GraphResult<bool>;
 
+    /// Return an iterator over the out-neighbors for a given node
     fn adj<'a>(&'a self, i: NodeIndex) -> NodeIndices<'a>;
 
     /// Return the number of nodes in the graph
@@ -100,7 +102,7 @@ enum GraphErrorType {
 
 type NodeIndex = uint;
 
-#[deriving(Show)]
+#[deriving(Show, Clone)]
 struct Node<T> {
     data: T,
     index: NodeIndex,
@@ -134,6 +136,27 @@ impl<T> UnGraph<T> {
         } else {
             Ok(self.adj[ind].len())
         }
+    }
+}
+impl<T: Clone> UnGraph<T> {
+    /// Returns a new graph induced by a set of node indices
+    pub fn induced_subgraph(&self, nodes: &HashSet<NodeIndex>) -> UnGraph<T> {
+        let mut new = UnGraph::new();
+        let mut ind_map = HashMap::new();
+
+        for (i, ind) in nodes.iter().enumerate() {
+            ind_map.insert(ind, i);
+            new.add_node(self.nodes[*ind].data.clone());
+        }
+
+        // Here we're assuming that NodeIndex = uint. Not sure how to easily do otherwise
+        for i in range(0, self.num_nodes) {
+            for j in self.adj[i].iter() {
+                new.add_edge(i, *j);
+            }
+        }
+
+        new
     }
 }
 
@@ -190,6 +213,32 @@ impl<T> Digraph<T> {
         } else {
             Ok(self.in_adj[ind].len())
         }
+    }
+}
+
+impl<T: Clone> Digraph<T> {
+    /// Returns a new graph induced by a set of node indices
+    pub fn induced_subgraph(&self, nodes: &HashSet<NodeIndex>) -> Digraph<T> {
+        let mut new = Digraph::new();
+        let mut ind_map = HashMap::new();
+
+        for (i, ind) in nodes.iter().enumerate() {
+            ind_map.insert(ind, i);
+            new.add_node(self.nodes[*ind].data.clone());
+        }
+
+        // Here we're assuming that NodeIndex = uint. Not sure how to easily do otherwise
+        for i in range(0, self.num_nodes) {
+            for j in self.in_adj[i].iter() {
+                new.add_edge(*j, i);
+            }
+
+            for j in self.out_adj[i].iter() {
+                new.add_edge(i, *j);
+            }
+        }
+
+        new
     }
 }
 
