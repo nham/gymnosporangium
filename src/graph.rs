@@ -41,7 +41,6 @@ trait Graph<T> {
                         break;
                     } else {
                         let another = unvisited.iter().next().unwrap();
-                        unvisited.remove(&another);
                         discovered.push_back((another, None));
                         continue;
                     }
@@ -52,6 +51,7 @@ trait Graph<T> {
                         tree.add_edge(parent.unwrap(), ind);
                     }
                     visited.insert(ind);
+                    unvisited.remove(ind);
 
                     for i in self.adj(ind) {
                         if !visited.contains(i) {
