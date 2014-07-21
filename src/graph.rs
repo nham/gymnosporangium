@@ -244,6 +244,30 @@ impl<T: Clone> Digraph<T> {
 
         new
     }
+
+    // Returns the transpose of the graph
+    pub fn transpose(&self) -> Digraph<T> {
+        let mut new = Digraph::new();
+        let mut ind_map = HashMap::new(); // maps old indices to new
+
+        for n in self.nodes.values() {
+            let new_ind = new.add_node(n.data.clone());
+            ind_map.insert(n.index, new_ind);
+        }
+
+        for &i in self.nodes.keys() {
+            let actual_i = *ind_map.find(&i).unwrap();
+
+            for j in self.get_in_adj(i).iter() {
+                new.add_edge(actual_i, *ind_map.find(j).unwrap());
+            }
+
+            for j in self.get_out_adj(i).iter() {
+                new.add_edge(*ind_map.find(j).unwrap(), actual_i);
+             }
+        }
+        new
+    }
 }
 
 impl<T> Graph<T> for Digraph<T> {
