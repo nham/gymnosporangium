@@ -86,17 +86,18 @@ impl<T: Clone> Ungraph<T> {
     /// Returns a new graph induced by a set of node indices
     pub fn induced_subgraph(&self, nodes: &NodeIndexSet) -> Ungraph<T> {
         let mut new = Ungraph::new();
-        let mut ind_map = HashMap::new();
+        let mut ind_map = HashMap::new(); // maps old indices to new
 
-        for (i, ind) in nodes.iter().enumerate() {
+        for (i, &ind) in nodes.iter().enumerate() {
             ind_map.insert(ind, i);
-            new.add_node(self.get_node(*ind).data.clone());
+            new.add_node(self.get_node(ind).data.clone());
         }
 
-        // Here we're assuming that NodeIndex = uint. Not sure how to easily do otherwise
-        for i in range(0, self.num_nodes) {
+        for &i in nodes.iter() {
             for j in self.get_adj(i).iter() {
-                new.add_edge(i, *j);
+                if nodes.contains(j) {
+                    new.add_edge(i, *ind_map.find(j).unwrap());
+                }
             }
         }
 
@@ -183,21 +184,24 @@ impl<T: Clone> Digraph<T> {
     /// Returns a new graph induced by a set of node indices
     pub fn induced_subgraph(&self, nodes: &NodeIndexSet) -> Digraph<T> {
         let mut new = Digraph::new();
-        let mut ind_map = HashMap::new();
+        let mut ind_map = HashMap::new(); // maps old indices to new
 
-        for (i, ind) in nodes.iter().enumerate() {
+        for (i, &ind) in nodes.iter().enumerate() {
             ind_map.insert(ind, i);
-            new.add_node(self.get_node(*ind).data.clone());
+            new.add_node(self.get_node(ind).data.clone());
         }
 
-        // Here we're assuming that NodeIndex = uint. Not sure how to easily do otherwise
-        for i in range(0, self.num_nodes) {
+        for &i in nodes.iter() {
             for j in self.get_in_adj(i).iter() {
-                new.add_edge(*j, i);
+                if nodes.contains(j) {
+                    new.add_edge(i, *ind_map.find(j).unwrap());
+                }
             }
 
             for j in self.get_out_adj(i).iter() {
-                new.add_edge(i, *j);
+                if nodes.contains(j) {
+                    new.add_edge(i, *ind_map.find(j).unwrap());
+                }
             }
         }
 
