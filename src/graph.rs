@@ -17,39 +17,6 @@ pub trait Graph<T> {
     fn num_nodes(&self) -> uint;
 
     fn node_indices(&self) -> NodeIndices;
-
-    fn dfs(&self) -> Digraph<NodeIndex> {
-        let mut tree = Digraph::new();
-
-        if self.num_nodes() == 0 {
-            return tree;
-        }
-
-        let mut visited = HashSet::new();
-        let mut discovered = vec!();
-
-        discovered.push((0, None));
-        loop {
-            match discovered.pop() {
-                None => break,
-                Some((ind, parent)) => {
-                    tree.add_node(ind);
-                    if parent.is_some() {
-                        tree.add_edge(parent.unwrap(), ind);
-                    }
-                    visited.insert(ind);
-
-                    for i in self.adj(ind) {
-                        if !visited.contains(i) {
-                            discovered.push((*i, Some(ind)));
-                        }
-                    }
-                }
-            }
-        }
-        return tree;
-
-    }
 }
 
 struct GraphError {
