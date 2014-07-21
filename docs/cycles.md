@@ -24,11 +24,13 @@ A **walk** in a unigraph is a finite sequence of nodes $(x_1, \ldots, x_n)$ such
 
 A **sub-walk** of a walk $w$ is just a walk $x$ that is a sub-sequence of $w$.
 
+It is easy to prove if $w$ is a walk for a unigraph $G$, then any sub-walk is also a walk for $G$.
+
+The **distance** from a node $i$ to a node $j$ is the length of the smallest walk starting at $i$ and ending at $j$.
+
 A **cycle** is a walk with at least length 3 distinct nodes that starts and ends at the same node.
 
 Consider the collection $W$ of all walks for a graph $G$. $G$ is said to be **cyclic** if $W$ contains at least one cycle, and **acyclic** otherwise.
-
-It is easy to prove if $w$ is a walk for a unigraph $G$, then any sub-walk is also a walk for $G$.
 
 A node with no out-neighbors will be called a **leaf node**.
 
@@ -54,6 +56,19 @@ Any acyclic unigraph can be reduced to an empty unigraph by removing leaf nodes.
 A graph $G = (V, E)$ is the **subgraph** of a graph $H = (W, F)$ iff $V \subseteq W$ and $E \subseteq F$. If $E$ consists of every edge in $F$ between nodes in $V$, then $G$ is said to be an **induced subgraph** or to be the subgraph **induced by $V$**.
 
 # Connected component
-An induced subgraph $H$ of $G$ is a **connected component** of $G$ iff there is a path starting at any node and ending at any other node in $H$.
+An induced subgraph $H$ of $G$ is a **connected component** of $G$ iff there is a walk starting at any node and ending at any other node in $H$.
 
 Note: everyone else seems to call this a "strongly connected component", but that's a bad name because it makes you think there's some other notion of connectedness in use. "Strongly connected component" is actually how you generalize "connected component" to digraphs, as far as I understand. It's the only notion of connectedness you generally want. Hence I call it simply "connected component" here.
+
+
+# Trees
+A **tree** is either the empty graph or a tuple $(T, i)$ where $T$ is a graph such that there is a unique walk from $i$ to any other node in $T$. The node $i$ is called the **root** of the tree.
+
+Trees must be acyclic, since if there were a cycle starting and ending at node $j$, then there would not be a unique path from the root to $j$ (we could always append the cycle to get another path from root to $j$).
+
+In a rooted tree, each node has a well-defined **level**, which is the length of the path from root to the node.
+
+
+# Breadth-first search
+
+A **breadth-first search** on a graph $G$ starting at node $i$ in $G$ is a routine that returns a tree $T$ with $i$ as the root such that $T$ contains exactly the nodes in the connected component of $G$ that $i$ is in and such that each node's level in $T$ is it's distance from $i$ in $G$.
