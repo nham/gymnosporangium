@@ -7,11 +7,11 @@ pub trait Graph<T> {
     /// Insert a new node, returning its index
     fn add_node(&mut self, val: T) -> NodeIndex;
 
-    /// Insert a new edge, returning an error if one of the indices is invalid
-    /// and a result otherwise
+    /// Insert a new edge, returning an error if one of the indices is invalid.
+    /// Otherwise, return true if the edge was not already present.
     fn add_edge(&mut self, i: NodeIndex, j: NodeIndex) -> GraphResult<bool>;
 
-    /// Remove a new node, returning its index
+    /// Remove a node, returning an error if the index is invalid.
     fn remove_node(&mut self, i: NodeIndex) -> GraphResult<()>;
 
     /// Return an iterator over the out-neighbors for a given node
