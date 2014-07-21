@@ -225,21 +225,22 @@ impl<T: Clone> Digraph<T> {
         let mut new = Digraph::new();
         let mut ind_map = HashMap::new(); // maps old indices to new
 
-        for (i, &ind) in nodes.iter().enumerate() {
-            ind_map.insert(ind, i);
-            new.add_node(self.get_node(ind).data.clone());
+        for &ind in nodes.iter() {
+            let new_ind = new.add_node(self.get_node(ind).data.clone());
+            ind_map.insert(ind, new_ind);
         }
 
-        for &i in nodes.iter() {
-            for j in self.get_in_adj(i).iter() {
+        for i in nodes.iter() {
+            let actual_i = *ind_map.find(i).unwrap();
+            for j in self.get_in_adj(*i).iter() {
                 if nodes.contains(j) {
-                    new.add_edge(i, *ind_map.find(j).unwrap());
+                    new.add_edge(*ind_map.find(j).unwrap(), actual_i);
                 }
             }
 
-            for j in self.get_out_adj(i).iter() {
+            for j in self.get_out_adj(*i).iter() {
                 if nodes.contains(j) {
-                    new.add_edge(i, *ind_map.find(j).unwrap());
+                    new.add_edge(actual_i, *ind_map.find(j).unwrap());
                 }
             }
         }
@@ -266,7 +267,7 @@ impl<T: Clone> Digraph<T> {
 
             for j in self.get_out_adj(i).iter() {
                 new.add_edge(*ind_map.find(j).unwrap(), actual_i);
-             }
+            }
         }
         new
     }
