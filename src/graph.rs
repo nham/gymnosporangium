@@ -1,5 +1,6 @@
 use {HashSet, HashMap};
 use std::collections::{RingBuf, Deque};
+use std::fmt;
 
 // call this Unigraph instead?
 pub trait Graph<T> {
@@ -45,20 +46,56 @@ struct Node<T> {
 }
 
 /// Undirected graph. Allows loops.
-#[deriving(Show)]
 pub struct Ungraph<T> {
     nodes: HashMap<NodeIndex, Node<T>>,
     adj: HashMap<NodeIndex, NodeIndexSet>,
     num_nodes: uint,
 }
 
+impl<T: fmt::Show> fmt::Show for Ungraph<T> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> Result<(), fmt::FormatError> {
+        write!(fmt, "{{");
+        for n in self.nodes.values() {
+            write!(fmt, " {} ", n.data);
+        }
+        write!(fmt, "}}  ");
+
+        for (&i, adj) in self.adj.iter() {
+            for &j in adj.iter() {
+                write!(fmt, "({}, {})", self.get_node(i).data, 
+                                        self.get_node(j).data);
+            }
+        }
+
+        Ok(())
+    }
+}
+
 /// Directed graph. Allows loops.
-#[deriving(Show)]
 pub struct Digraph<T> {
     nodes: HashMap<NodeIndex, Node<T>>,
     in_adj: HashMap<NodeIndex, NodeIndexSet>,
     out_adj: HashMap<NodeIndex, NodeIndexSet>,
     num_nodes: uint,
+}
+
+impl<T: fmt::Show> fmt::Show for Digraph<T> {
+    fn fmt(&self, fmt: &mut fmt::Formatter) -> Result<(), fmt::FormatError> {
+        write!(fmt, "{{");
+        for n in self.nodes.values() {
+            write!(fmt, " {} ", n.data);
+        }
+        write!(fmt, "}}  ");
+
+        for (&i, adj) in self.out_adj.iter() {
+            for &j in adj.iter() {
+                write!(fmt, "({}, {})", self.get_node(i).data, 
+                                        self.get_node(j).data);
+            }
+        }
+
+        Ok(())
+    }
 }
 
 impl<T> Ungraph<T> {
