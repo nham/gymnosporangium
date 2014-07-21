@@ -1,5 +1,5 @@
-use {HashSet};
-use std::collections::{HashMap, RingBuf, Deque};
+use {HashSet, HashMap};
+use std::collections::{RingBuf, Deque};
 
 // call this Unigraph instead?
 pub trait Graph<T> {

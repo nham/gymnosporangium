@@ -1,6 +1,7 @@
-use {HashSet};
+use {HashSet, HashMap};
 
 type NodeIndex = uint;
+type NodeIndexSet = HashSet<NodeIndex>;
 
 #[deriving(Show)]
 struct Node<T> {
@@ -12,19 +13,23 @@ struct Node<T> {
 #[deriving(Show)]
 pub struct Tree<T> {
     root: Option<NodeIndex>,
-    nodes: Vec<Node<T>>,
-    children: Vec<HashSet<NodeIndex>>,
+    nodes: HashMap<NodeIndex, Node<T>>,
+    children: HashMap<NodeIndex, NodeIndexSet>,
     num_nodes: uint,
 }
 
 impl<T> Tree<T> {
     pub fn new() -> Tree<T> {
-        Tree { root: None, nodes: vec!(), children: vec!(), num_nodes: 0 }
+        Tree { root: None, nodes: HashMap::new(), 
+               children: HashMap::new(), num_nodes: 0 }
     }
 
     pub fn with_root(val: T) -> Tree<T> {
         let root = Node { data: val, index: 0, parent: None };
-        Tree { root: Some(0), nodes: vec!(root), children: vec!(), num_nodes: 1 }
+        let mut map = HashMap::new();
+        map.insert(0, root);
+        Tree { root: Some(0), nodes: map, 
+               children: HashMap::new(), num_nodes: 1 }
     }
 
     /// Add a root to any empty tree
@@ -36,16 +41,18 @@ impl<T> Tree<T> {
         self.add_node(Some(parent), val);
     }
 
-    fn add_node(&mut self, parent: Option<NodeIndex>, val: T) {
+    fn add_node(&mut self, parent: Option<NodeIndex>, val: T) -> NodeIndex {
         // TODO: check whether NodeIndex is valid?
-        let node = Node { data: val, index: self.num_nodes, parent: parent };
-        self.nodes.push(node);
-        self.children.push(HashSet::new());
+        let ind = self.num_nodes;
+        let node = Node { data: val, index: ind, parent: parent };
+        self.nodes.insert(ind, node);
+        self.children.insert(ind, HashSet::new());
 
         if parent.is_some() {
-            self.children.get_mut(parent.unwrap()).insert(self.num_nodes);
+            self.children.find_mut(&parent.unwrap()).unwrap().insert(ind);
         }
 
         self.num_nodes += 1;
+        ind
     }
 }

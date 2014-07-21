@@ -1,4 +1,4 @@
-pub use std::collections::{HashSet};
+pub use std::collections::{HashSet, HashMap};
 
 mod graph;
 mod traversal;
