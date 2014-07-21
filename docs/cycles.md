@@ -26,7 +26,7 @@ It is easy to prove if $p$ is a path for a unigraph $G$, then any sub-path is al
 
 The **distance** from a node $i$ to a node $j$ is the length of the smallest path starting at $i$ and ending at $j$.
 
-A **cycle** is a non-empty path $(x_1, \ldots, x_n)$ such that for all $i$ and $j$, $x_i = x_j$ iff $i = 1$ and $j = n$. (TODO: Tarjan calls this simply a closed path, and enforces that a cycle must have no repeated edges. That's not possible to define with the current formalism, but do we need to make the distinction?)
+A **closed path** is a non-empty path $(x_1, \ldots, x_n)$ such that $x_1 = x_n$. A **cycle** is a closed path where for any $i \neq j$, $x_i = x_j$ only if $i = 1$ and $j = n$.
 
 Consider the collection $W$ of all paths for a graph $G$. $G$ is said to be **cyclic** if $W$ contains at least one cycle, and **acyclic** otherwise.
 
@@ -54,17 +54,23 @@ Any acyclic unigraph can be reduced to an empty unigraph by removing leaf nodes.
 A graph $G = (V, E)$ is the **subgraph** of a graph $H = (W, F)$ iff $V \subseteq W$ and $E \subseteq F$. If $E$ consists of every edge in $F$ between nodes in $V$, then $G$ is said to be an **induced subgraph** or to be the subgraph **induced by $V$**.
 
 # Connected component
-An induced subgraph $H$ of $G$ is a **connected component** of $G$ iff there is a walk starting at any node and ending at any other node in $H$.
-
-Note: everyone else seems to call this a "strongly connected component", but that's a bad name because it makes you think there's some other notion of connectedness in use. "Strongly connected component" is actually how you generalize "connected component" to digraphs, as far as I understand. It's the only notion of connectedness you generally want. Hence I call it simply "connected component" here.
+A unigraph $G$ is **connected** iff there is a path from any node to any other node in $G$.
 
 
 # Trees
-A **tree** is either the empty graph or a tuple $(T, i)$ where $T$ is a graph such that there is a unique walk from $i$ to any other node in $T$. The node $i$ is called the **root** of the tree.
+A **tree** is either the empty unigraph or a tuple $(T, i)$ where $T$ is a unigraph such that there is a unique path from $i$ to any other node in $T$. The node $i$ is called the **root** of the tree.
 
 Trees must be acyclic, since if there were a cycle starting and ending at node $j$, then there would not be a unique path from the root to $j$ (we could always append the cycle to get another path from root to $j$).
 
 In a rooted tree, each node has a well-defined **level**, which is the length of the path from root to the node.
+
+## Proposition
+A unigraph $G$ is a tree iff it is either empty or there is exactly one node with no in-neighbors and all other nodes have exactly one in-neighbor.
+
+*Proof:* If $G$ is a tree with root $i$, then if it's non-empty, $i$ could not have any in-neighbors because the empty path starts and ends at $i$. Also, if any non-root node $j$ failed to have an in-neighbor, then there would be no path $i \to j$. Now since we know every non-root node has at least one in-neighbor, if a non-root node $j$ had more than one in-neighbor, we could find two different paths $i \to j$.
+
+Conversely, an empty unigraph is a tree by definition, and if a graph $G$ has exactly one node with no in-neighbors and all other nodes with exactly 1 in-neighbor, then we can construct a path from $i$ to any other node $j \neq i$ by starting at $j$ and working our way backwards via in-neighbors. This will give us a path, and the only way there could be another path is if one node had more than one in-neighbor.
+$\Box$.
 
 
 # Breadth-first search
