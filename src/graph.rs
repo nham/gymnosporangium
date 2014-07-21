@@ -107,7 +107,7 @@ impl<T> Ungraph<T> {
         Ungraph { nodes: HashMap::new(), adj: HashMap::new(), num_nodes: 0 }
     }
 
-    pub fn degree(&mut self, ind: NodeIndex) -> Result<uint, GraphError> {
+    pub fn degree(&mut self, ind: NodeIndex) -> GraphResult<uint> {
         if !self.adj.contains_key(&ind) {
             Err(GraphError::invalid_index(ind))
         } else {
@@ -209,7 +209,7 @@ impl<T> Digraph<T> {
                   num_nodes: 0 }
     }
 
-    pub fn out_degree(&mut self, ind: NodeIndex) -> Result<uint, GraphError> {
+    pub fn out_degree(&mut self, ind: NodeIndex) -> GraphResult<uint> {
         if !self.nodes.contains_key(&ind) {
             Err(GraphError::invalid_index(ind))
         } else {
@@ -217,7 +217,7 @@ impl<T> Digraph<T> {
         }
     }
 
-    pub fn in_degree(&mut self, ind: NodeIndex) -> Result<uint, GraphError> {
+    pub fn in_degree(&mut self, ind: NodeIndex) -> GraphResult<uint> {
         if ind >= self.num_nodes {
             Err(GraphError::invalid_index(ind))
         } else {
