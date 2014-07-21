@@ -20,6 +20,7 @@ pub trait Graph<T> {
     /// Return the number of nodes in the graph
     fn num_nodes(&self) -> uint;
 
+    /// Returns an iterator over the indices of all the nodes in the graph
     fn node_indices(&self) -> NodeIndices;
 }
 
