@@ -79,7 +79,7 @@ struct Node<T> {
 
 /// Undirected graph. Allows loops.
 #[deriving(Show)]
-pub struct UnGraph<T> {
+pub struct Ungraph<T> {
     nodes: HashMap<NodeIndex, Node<T>>,
     adj: HashMap<NodeIndex, NodeIndexSet>,
     num_nodes: uint,
@@ -94,9 +94,9 @@ pub struct Digraph<T> {
     num_nodes: uint,
 }
 
-impl<T> UnGraph<T> {
-    pub fn new() -> UnGraph<T> {
-        UnGraph { nodes: HashMap::new(), adj: HashMap::new(), num_nodes: 0 }
+impl<T> Ungraph<T> {
+    pub fn new() -> Ungraph<T> {
+        Ungraph { nodes: HashMap::new(), adj: HashMap::new(), num_nodes: 0 }
     }
 
     pub fn degree(&mut self, ind: NodeIndex) -> Result<uint, GraphError> {
@@ -115,10 +115,10 @@ impl<T> UnGraph<T> {
         self.adj.find(&i).unwrap()
     }
 }
-impl<T: Clone> UnGraph<T> {
+impl<T: Clone> Ungraph<T> {
     /// Returns a new graph induced by a set of node indices
-    pub fn induced_subgraph(&self, nodes: &NodeIndexSet) -> UnGraph<T> {
-        let mut new = UnGraph::new();
+    pub fn induced_subgraph(&self, nodes: &NodeIndexSet) -> Ungraph<T> {
+        let mut new = Ungraph::new();
         let mut ind_map = HashMap::new();
 
         for (i, ind) in nodes.iter().enumerate() {
@@ -137,7 +137,7 @@ impl<T: Clone> UnGraph<T> {
     }
 }
 
-impl<T> Graph<T> for UnGraph<T> {
+impl<T> Graph<T> for Ungraph<T> {
     fn add_node(&mut self, val: T) -> NodeIndex {
         let ind = self.num_nodes;
         self.nodes.insert(ind, Node { data: val, index: ind });
