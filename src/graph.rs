@@ -11,6 +11,9 @@ pub trait Graph<T> {
     /// and a result otherwise
     fn add_edge(&mut self, i: NodeIndex, j: NodeIndex) -> GraphResult<bool>;
 
+    /// Remove a new node, returning its index
+    fn remove_node(&mut self, i: NodeIndex) -> GraphResult<()>;
+
     /// Return an iterator over the out-neighbors for a given node
     fn adj(&self, i: NodeIndex) -> NodeIndices;
 
@@ -169,6 +172,21 @@ impl<T> Graph<T> for Ungraph<T> {
         }
     }
 
+    fn remove_node(&mut self, i: NodeIndex) -> GraphResult<()> {
+        if !self.nodes.contains_key(&i) {
+            Err(GraphError::invalid_index(i))
+        } else {
+            self.nodes.remove(&i);
+
+            for j in self.adj(i) {
+                self.adj.find_mut(&j).unwrap().remove(&i);
+            }
+            self.adj.remove(&i);
+            self.num_nodes -= 1;
+            Ok(())
+        }
+    }
+
     fn adj(&self, i: NodeIndex) -> NodeIndices {
         FromIterator::from_iter(self.get_adj(i).iter().map(|&x| x))
     }
@@ -204,6 +222,14 @@ impl<T> Digraph<T> {
         } else {
             Ok(self.get_in_adj(ind).len())
         }
+    }
+
+    fn in_adj(&self, i: NodeIndex) -> NodeIndices {
+        FromIterator::from_iter(self.get_in_adj(i).iter().map(|&x| x))
+    }
+
+    pub fn is_dag(&self) -> bool {
+        false
     }
 
     pub fn get_node<'a>(&'a self, i: NodeIndex) -> &'a Node<T> {
@@ -299,6 +325,27 @@ impl<T> Graph<T> for Digraph<T> {
         }
     }
 
+    fn remove_node(&mut self, i: NodeIndex) -> GraphResult<()> {
+        if !self.nodes.contains_key(&i) {
+            Err(GraphError::invalid_index(i))
+        } else {
+            self.nodes.remove(&i);
+
+            for j in self.adj(i) {
+                self.in_adj.find_mut(&j).unwrap().remove(&i);
+            }
+            self.out_adj.remove(&i);
+
+            for j in self.in_adj(i) {
+                self.out_adj.find_mut(&j).unwrap().remove(&i);
+            }
+            self.in_adj.remove(&i);
+
+            self.num_nodes -= 1;
+            Ok(())
+        }
+    }
+
     fn adj(&self, i: NodeIndex) -> NodeIndices {
         FromIterator::from_iter(self.get_out_adj(i).iter().map(|&x| x))
     }
@@ -336,5 +383,4 @@ impl FromIterator<NodeIndex> for NodeIndices {
         }
         NodeIndices { indices: vec, curr: 0 }
     }
-
 }
