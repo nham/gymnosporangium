@@ -14,6 +14,10 @@ pub trait Graph<T> {
     /// Remove a node, returning an error if the index is invalid.
     fn remove_node(&mut self, i: NodeIndex) -> GraphResult<()>;
 
+    /// Remove an edge, returning an error if one of the indices is invalid
+    /// Otherwise, return true if the edge was already present.
+    fn remove_edge(&mut self, i: NodeIndex, j: NodeIndex) -> GraphResult<bool>;
+
     /// Return an iterator over the out-neighbors for a given node
     fn adj(&self, i: NodeIndex) -> NodeIndices;
 
@@ -122,6 +126,11 @@ impl<T> Ungraph<T> {
     pub fn get_adj<'a>(&'a self, i: NodeIndex) -> &'a NodeIndexSet {
         self.adj.find(&i).unwrap()
     }
+
+    // return true if the nodes i and j are adjacent, and false otherwise
+    pub fn are_adj(&self, i: NodeIndex, j: NodeIndex) -> bool {
+        self.get_adj(i).contains(&j)
+    }
 }
 
 impl<T: Clone> Ungraph<T> {
@@ -188,6 +197,16 @@ impl<T> Graph<T> for Ungraph<T> {
         }
     }
 
+    fn remove_edge(&mut self, i: NodeIndex, j: NodeIndex) -> GraphResult<bool> {
+        if !self.nodes.contains_key(&i) {
+            Err(GraphError::invalid_index(i))
+        } else if !self.nodes.contains_key(&j) {
+            Err(GraphError::invalid_index(j))
+        } else {
+            Ok(self.are_adj(i, j))
+        }
+    }
+
     fn adj(&self, i: NodeIndex) -> NodeIndices {
         FromIterator::from_iter(self.get_adj(i).iter().map(|&x| x))
     }
@@ -229,10 +248,6 @@ impl<T> Digraph<T> {
         FromIterator::from_iter(self.get_in_adj(i).iter().map(|&x| x))
     }
 
-    pub fn is_dag(&self) -> bool {
-        false
-    }
-
     pub fn get_node<'a>(&'a self, i: NodeIndex) -> &'a Node<T> {
         self.nodes.find(&i).unwrap()
     }
@@ -243,6 +258,11 @@ impl<T> Digraph<T> {
 
     pub fn get_out_adj<'a>(&'a self, i: NodeIndex) -> &'a NodeIndexSet {
         self.out_adj.find(&i).unwrap()
+    }
+
+    // return true if j is an out-neighbor of i, and false otherwise
+    pub fn is_out_adj_to(&self, i: NodeIndex, j: NodeIndex) -> bool {
+        self.get_out_adj(i).contains(&j)
     }
 }
 
@@ -344,6 +364,16 @@ impl<T> Graph<T> for Digraph<T> {
 
             self.num_nodes -= 1;
             Ok(())
+        }
+    }
+
+    fn remove_edge(&mut self, i: NodeIndex, j: NodeIndex) -> GraphResult<bool> {
+        if !self.nodes.contains_key(&i) {
+            Err(GraphError::invalid_index(i))
+        } else if !self.nodes.contains_key(&j) {
+            Err(GraphError::invalid_index(j))
+        } else {
+            Ok(self.is_out_adj_to(i, j))
         }
     }
 
