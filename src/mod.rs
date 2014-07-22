@@ -2,7 +2,7 @@ pub use std::collections::HashSet;
 use graph::{Graph, Ungraph, Digraph};
 
 mod graph;
-mod traversal;
+mod algorithms;
 mod tree;
 
 fn main() {
