@@ -64,6 +64,11 @@ Trees must be acyclic, since if there were a cycle starting and ending at node $
 
 In a rooted tree, each node has a well-defined **level**, which is the length of the path from root to the node.
 
+We say that node $i$ is an **ancestor** of node $j$ and that node $j$ is a **descendant** of node $i$ iff there is a path $i \to j$. This heredity relation is denoted $i \ast j$.
+
+A **spanning tree** for a graph $G$ is a subgraph of $G$ that is both a tree and contains all the nodes of $G$.
+
+
 ## Proposition
 A graph $G$ is a tree iff it is either empty or there is exactly one node with no in-neighbors and all other nodes have exactly one in-neighbor.
 
