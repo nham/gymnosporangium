@@ -1,5 +1,4 @@
-use {HashSet};
-use std::collections::{HashMap, RingBuf, Deque};
+use std::collections::{HashSet, HashMap, RingBuf, Deque};
 
 use graph::{Graph, NodeIndex};
 use tree::Tree;

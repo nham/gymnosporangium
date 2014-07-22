@@ -1,4 +1,4 @@
-pub use std::collections::{HashSet, HashMap};
+pub use std::collections::HashSet;
 use graph::{Graph, Ungraph, Digraph};
 
 mod graph;

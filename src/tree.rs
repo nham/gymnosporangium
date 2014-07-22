@@ -1,4 +1,4 @@
-use {HashSet, HashMap};
+use std::collections::{HashSet, HashMap};
 
 type NodeIndex = uint;
 type NodeIndexSet = HashSet<NodeIndex>;
