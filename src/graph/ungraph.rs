@@ -110,7 +110,7 @@ impl<T> Graph<T> for Ungraph<T> {
         } else {
             self.nodes.remove(&i);
 
-            for j in self.adj(i) {
+            for j in self.reachable(i) {
                 self.adj.find_mut(&j).unwrap().remove(&i);
             }
             self.adj.remove(&i);
@@ -129,7 +129,7 @@ impl<T> Graph<T> for Ungraph<T> {
         }
     }
 
-    fn adj(&self, i: NodeIndex) -> NodeIndices {
+    fn reachable(&self, i: NodeIndex) -> NodeIndices {
         FromIterator::from_iter(self.get_adj(i).iter().map(|&x| x))
     }
 

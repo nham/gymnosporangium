@@ -161,7 +161,7 @@ impl<T> Graph<T> for Digraph<T> {
         } else {
             self.nodes.remove(&i);
 
-            for j in self.adj(i) {
+            for j in self.reachable(i) {
                 self.in_adj.find_mut(&j).unwrap().remove(&i);
             }
             self.out_adj.remove(&i);
@@ -186,7 +186,7 @@ impl<T> Graph<T> for Digraph<T> {
         }
     }
 
-    fn adj(&self, i: NodeIndex) -> NodeIndices {
+    fn reachable(&self, i: NodeIndex) -> NodeIndices {
         FromIterator::from_iter(self.get_out_adj(i).iter().map(|&x| x))
     }
 

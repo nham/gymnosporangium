@@ -14,7 +14,7 @@ use tree::Tree;
 ///        mark v as discovered
 ///        while S is not empty:
 ///            curr = S.pop()
-///            for all nodes w out-adjacent to curr:
+///            for all nodes w reachable from curr
 ///                if w is not yet discovered
 ///                    S.insert(w)
 ///                    mark w as discovered
@@ -39,7 +39,7 @@ fn bf_trav<T, G: Graph<T>>(g: &G, start: NodeIndex) -> Tree<NodeIndex> {
                     Some(p_ind) => tree.add_child(p_ind, ind),
                 }
 
-                for i in g.adj(ind) {
+                for i in g.reachable(ind) {
                     if !discovered.contains(&i) {
                         queue.push_back((i, Some(ind)));
                         discovered.insert(i);
@@ -63,7 +63,7 @@ fn bf_trav<T, G: Graph<T>>(g: &G, start: NodeIndex) -> Tree<NodeIndex> {
 ///            curr = S.pop()
 ///            if curr is not yet visited:
 ///                add curr to visited
-///                for all nodes w out-adjacent to curr:
+///                for all nodes w reachable from curr
 ///                    S.push(w)
 fn df_trav<T, G: Graph<T>>(g: &G, start: NodeIndex) -> Tree<NodeIndex> {
     let mut tree = Tree::new();
@@ -87,7 +87,7 @@ fn df_trav<T, G: Graph<T>>(g: &G, start: NodeIndex) -> Tree<NodeIndex> {
                     }
                     visited.insert(ind);
 
-                    for i in g.adj(ind) {
+                    for i in g.reachable(ind) {
                         stack.push((i, Some(ind)));
                     }
                 }

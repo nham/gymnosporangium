@@ -23,8 +23,8 @@ pub trait Graph<T> {
     /// Otherwise, return true if the edge was already present.
     fn remove_edge(&mut self, i: NodeIndex, j: NodeIndex) -> GraphResult<bool>;
 
-    /// Return an iterator over the out-neighbors for a given node
-    fn adj(&self, i: NodeIndex) -> NodeIndices;
+    /// Return an iterator over the nodes reachable from the given node index
+    fn reachable(&self, i: NodeIndex) -> NodeIndices;
 
     /// Return the number of nodes in the graph
     fn num_nodes(&self) -> uint;
