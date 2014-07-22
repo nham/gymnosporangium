@@ -1,0 +1,15 @@
+ - TESTS
+ - kosaraju strongly connceted components
+ - topological sorting (use CLRS, look at Skiena)
+ - testing if a dag is cyclic (back edges? look at DFS)
+ - minimum spanning tree (networkx uses kruskal)
+ - tarjans strongly connected components algorithm?
+ - graph isomorphism algorithm. probably vf2
+ - tree isomorphism algorithm. AHU!
+ - Prim's algorithm? what even is it
+ - Dijkstra's algorithm
+ - Bellman-Ford
+ - Stoer-Wagner min-cut
+ - floyd-warshall
+ - stuff about bipartite graphs?
+ - Huffman codes?
