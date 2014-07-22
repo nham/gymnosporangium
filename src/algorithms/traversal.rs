@@ -1,6 +1,6 @@
 use std::collections::{HashSet, HashMap, RingBuf, Deque};
 
-use graph::{Graph, NodeIndex};
+use graph::{Graph, NodeIndex, NodeIndexSet};
 use tree::Tree;
 
 type Forest<T> = Vec<Tree<T>>;
@@ -54,6 +54,22 @@ fn bf_trav<T, G: Graph<T>>(g: &G, start: NodeIndex) -> Tree<NodeIndex> {
 }
 
 
+fn df_trav<T, G: Graph<T>>(g: &G, start: NodeIndex) -> Tree<NodeIndex> {
+    df_trav_comp(g, start, &mut HashSet::new())
+}
+
+fn df_trav_all<T, G: Graph<T>>(g: &G, start: NodeIndex) -> Forest<NodeIndex> {
+    let mut forest = vec!();
+
+    let mut unvisited: NodeIndexSet = g.node_indices().collect();
+
+    while !unvisited.is_empty() {
+        forest.push( df_trav_comp(g, start, &mut unvisited) );
+    }
+
+    forest
+}
+
 /// Do a depth-first traversal of the graph, returning the resulting depth-
 /// first tree
 ///
@@ -67,7 +83,15 @@ fn bf_trav<T, G: Graph<T>>(g: &G, start: NodeIndex) -> Tree<NodeIndex> {
 ///                add curr to visited
 ///                for all nodes w reachable from curr
 ///                    S.push(w)
-fn df_trav<T, G: Graph<T>>(g: &G, start: NodeIndex) -> Tree<NodeIndex> {
+///
+/// The signature of this is kind of wonky in an attempt to prevent code 
+/// duplication. The idea is that we want both a df_trav function, which traverses 
+/// only the nodes reachable from the starting point, and a df_trav_all, which 
+/// traverses the entire graph. df_trav_all needs to pass in a set of unvisited 
+/// nodes so it knows when all the nodes have been checked. That's why df_trav 
+/// passes in a dummy set.
+fn df_trav_comp<T, G: Graph<T>>(g: &G, start: NodeIndex, rem: &mut NodeIndexSet) 
+    -> Tree<NodeIndex> {
     let mut tree = Tree::new();
 
     if g.num_nodes() == 0 {
@@ -88,6 +112,7 @@ fn df_trav<T, G: Graph<T>>(g: &G, start: NodeIndex) -> Tree<NodeIndex> {
                         Some(p_ind) => tree.add_child(p_ind, ind),
                     }
                     visited.insert(ind);
+                    rem.remove(&ind);
 
                     for i in g.reachable(ind) {
                         stack.push((i, Some(ind)));
@@ -97,50 +122,4 @@ fn df_trav<T, G: Graph<T>>(g: &G, start: NodeIndex) -> Tree<NodeIndex> {
         }
     }
     return tree;
-}
-
-fn df_trav_all<T, G: Graph<T>>(g: &G, start: NodeIndex) -> Forest<NodeIndex> {
-    let mut forest = vec!();
-    let mut tree = Tree::new();
-
-    if g.num_nodes() == 0 {
-        return forest;
-    }
-
-    let mut unvisited: HashSet<NodeIndex> = g.node_indices().collect();
-    let mut visited = HashSet::new();
-    let mut stack = vec!();
-
-    stack.push((start, None));
-    loop {
-        match stack.pop() {
-            None => {
-                if unvisited.is_empty() {
-                    break;
-                } else {
-                    // we've exhausted the nodes reachable from our last start point
-                    // so restart the traversal with an unvisited node
-                    forest.push(tree);
-                    tree = Tree::new();
-                    let another = *unvisited.iter().next().unwrap();
-                    stack.push((another, None));
-                }
-            }
-            Some((ind, parent)) => {
-                if !visited.contains(&ind) {
-                    match parent {
-                        None => tree.add_root(ind),
-                        Some(p_ind) => tree.add_child(p_ind, ind),
-                    }
-                    visited.insert(ind);
-                    unvisited.remove(&ind);
-
-                    for i in g.reachable(ind) {
-                        stack.push((i, Some(ind)));
-                    }
-                }
-            }
-        }
-    }
-    forest
 }

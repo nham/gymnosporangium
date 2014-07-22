@@ -50,7 +50,7 @@ enum GraphErrorType {
 }
 
 pub type NodeIndex = uint;
-type NodeIndexSet = HashSet<NodeIndex>;
+pub type NodeIndexSet = HashSet<NodeIndex>;
 
 #[deriving(Show, Clone)]
 struct Node<T> {
