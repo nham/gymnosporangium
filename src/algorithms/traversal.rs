@@ -3,6 +3,8 @@ use std::collections::{HashSet, HashMap, RingBuf, Deque};
 use graph::{Graph, NodeIndex};
 use tree::Tree;
 
+type Forest<T> = Vec<Tree<T>>;
+
 /// Do a breadth-first traversal of the graph, returning the resulting breadth-
 /// first tree (a tree on the connected component containing the start node)
 ///
@@ -95,4 +97,50 @@ fn df_trav<T, G: Graph<T>>(g: &G, start: NodeIndex) -> Tree<NodeIndex> {
         }
     }
     return tree;
+}
+
+fn df_trav_all<T, G: Graph<T>>(g: &G, start: NodeIndex) -> Forest<NodeIndex> {
+    let mut forest = vec!();
+    let mut tree = Tree::new();
+
+    if g.num_nodes() == 0 {
+        return forest;
+    }
+
+    let mut unvisited: HashSet<NodeIndex> = g.node_indices().collect();
+    let mut visited = HashSet::new();
+    let mut stack = vec!();
+
+    stack.push((start, None));
+    loop {
+        match stack.pop() {
+            None => {
+                if unvisited.is_empty() {
+                    break;
+                } else {
+                    // we've exhausted the nodes reachable from our last start point
+                    // so restart the traversal with an unvisited node
+                    forest.push(tree);
+                    tree = Tree::new();
+                    let another = *unvisited.iter().next().unwrap();
+                    stack.push((another, None));
+                }
+            }
+            Some((ind, parent)) => {
+                if !visited.contains(&ind) {
+                    match parent {
+                        None => tree.add_root(ind),
+                        Some(p_ind) => tree.add_child(p_ind, ind),
+                    }
+                    visited.insert(ind);
+                    unvisited.remove(&ind);
+
+                    for i in g.reachable(ind) {
+                        stack.push((i, Some(ind)));
+                    }
+                }
+            }
+        }
+    }
+    forest
 }
